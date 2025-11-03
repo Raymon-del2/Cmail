@@ -1,0 +1,45 @@
+# Copy this content to your .env file
+
+PORT=5000
+NODE_ENV=development
+
+# STEP 1: Get MongoDB Atlas connection string from https://cloud.mongodb.com
+# Replace the entire line below with your connection string
+MONGODB_URI=mongodb://localhost:27017/cmail
+
+# STEP 2: This JWT secret is already secure - you can use it as-is
+JWT_SECRET=cmail_2024_jwt_secret_a8f3k2m9p4x7q1w5e6r8t0y2u3i5o7p9
+JWT_EXPIRE=7d
+
+# STEP 3: Add your Gmail credentials
+# Get app password from: https://myaccount.google.com/apppasswords
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASSWORD=your-16-char-app-password-here
+EMAIL_FROM=C-mail <noreply@cmail.com>
+
+# These are already correct
+CLIENT_URL=http://localhost:5173
+MAGIC_LINK_EXPIRE=15m
+
+
+# ============================================
+# QUICK SETUP INSTRUCTIONS:
+# ============================================
+# 
+# 1. MongoDB Atlas (FREE):
+#    - Go to https://www.mongodb.com/cloud/atlas/register
+#    - Create free M0 cluster
+#    - Get connection string and paste above
+#
+# 2. Gmail App Password (FREE):
+#    - Enable 2FA: https://myaccount.google.com/security
+#    - Get app password: https://myaccount.google.com/apppasswords
+#    - Paste the 16-character password above
+#
+# 3. Save this file as .env (remove .txt extension)
+#
+# 4. Restart server: npm run dev
+#
+# Full guide: See BACKEND_SETUP.md

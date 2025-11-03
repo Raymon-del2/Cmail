@@ -1,0 +1,231 @@
+/* Mobile Responsive Styles for Cmail */
+
+/* Mobile-first breakpoints */
+/* sm: 640px, md: 768px, lg: 1024px, xl: 1280px */
+
+/* Base mobile styles */
+@media (max-width: 768px) {
+  /* Hide desktop sidebar on mobile */
+  .desktop-sidebar {
+    display: none;
+  }
+
+  /* Mobile navigation */
+  .mobile-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--dark-card);
+    border-top: 1px solid var(--dark-border);
+    padding: 0.5rem;
+    z-index: 50;
+    justify-content: space-around;
+  }
+
+  /* Adjust main content for mobile nav */
+  .main-content-mobile {
+    padding-bottom: 4rem;
+  }
+
+  /* Mobile header */
+  .mobile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: var(--dark-card);
+    border-bottom: 1px solid var(--dark-border);
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+
+  /* Email list mobile optimization */
+  .email-item-mobile {
+    padding: 0.75rem !important;
+  }
+
+  .email-item-mobile .email-sender {
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  .email-item-mobile .email-subject {
+    font-size: 0.875rem;
+  }
+
+  .email-item-mobile .email-preview {
+    font-size: 0.75rem;
+  }
+
+  /* Hide less important info on mobile */
+  .hide-mobile {
+    display: none !important;
+  }
+
+  /* Compose email mobile */
+  .compose-mobile {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 0 !important;
+    z-index: 100;
+  }
+
+  /* Mobile form inputs */
+  .input-field-mobile {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+  }
+
+  /* Mobile buttons */
+  .btn-mobile {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  /* Profile menu mobile */
+  .profile-menu-mobile {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 100;
+  }
+
+  /* Settings mobile */
+  .settings-mobile {
+    padding: 1rem;
+  }
+
+  .settings-mobile .card {
+    margin-bottom: 1rem;
+  }
+
+  /* Email view mobile */
+  .email-view-mobile {
+    padding: 1rem;
+  }
+
+  .email-view-mobile .email-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  /* Mobile search */
+  .search-mobile {
+    width: 100%;
+  }
+
+  /* Touch-friendly tap targets */
+  .tap-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Swipe actions hint */
+  .swipe-hint {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--dark-text-secondary);
+    text-align: center;
+    padding: 0.5rem;
+  }
+}
+
+/* Tablet styles */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .mobile-nav {
+    display: none;
+  }
+
+  .desktop-sidebar {
+    width: 200px;
+  }
+}
+
+/* Desktop styles */
+@media (min-width: 1025px) {
+  .mobile-nav {
+    display: none;
+  }
+
+  .mobile-header {
+    display: none;
+  }
+
+  .hide-desktop {
+    display: none !important;
+  }
+}
+
+/* Landscape mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .mobile-nav {
+    padding: 0.25rem;
+  }
+
+  .mobile-header {
+    padding: 0.5rem 1rem;
+  }
+}
+
+/* iOS safe area */
+@supports (padding: max(0px)) {
+  .mobile-nav {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+
+  .main-content-mobile {
+    padding-bottom: max(4rem, calc(4rem + env(safe-area-inset-bottom)));
+  }
+}
+
+/* Android notch support */
+@media (max-width: 768px) {
+  .mobile-header {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+}
+
+/* Pull to refresh indicator */
+.pull-to-refresh {
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+  color: var(--dark-text-secondary);
+}
+
+/* Mobile loading states */
+.mobile-loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+/* Responsive grid */
+@media (max-width: 768px) {
+  .grid-cols-2 {
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Mobile modal */
+@media (max-width: 768px) {
+  .modal-mobile {
+    position: fixed;
+    inset: 0;
+    margin: 0;
+    border-radius: 0;
+    max-width: 100%;
+    max-height: 100%;
+  }
+}
