@@ -74,7 +74,24 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 C-mail server running on port ${PORT}`);
-});
+// MongoDB Connection
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/cmail', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log('✅ MongoDB connected successfully'))
+.catch(err => console.error('❌ MongoDB connection error:', err));
+
+// Initialize Turso Database
+initTursoDB();
+
+// Export for Vercel serverless function
+module.exports = app;
+
+// Only listen if not running in Vercel
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`🚀 C-mail server running on port ${PORT}`);
+  });
+}
