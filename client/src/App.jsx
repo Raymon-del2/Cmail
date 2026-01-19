@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
+import AccountSelector from './components/AccountSelector'
 import './styles/mobile.css'
 import SignIn from './pages/SignIn'
 import SignUp from './pages/SignUp'
@@ -201,6 +202,7 @@ function App() {
           <Route path="/oauth/authorize" element={<OAuthAuthorize />} />
           <Route path="/" element={<Navigate to="/signin" replace />} />
         </Routes>
+        <AccountSelector />
       </Router>
     </AuthProvider>
   )
