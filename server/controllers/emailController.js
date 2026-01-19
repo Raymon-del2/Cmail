@@ -1,30 +1,86 @@
 const Email = require('../models/Email');
 const User = require('../models/User');
 const { sendEmail } = require('../utils/email');
+const { saveEmailToTurso } = require('../utils/tursoEmails');
 
 // Send email
 exports.sendEmail = async (req, res) => {
   try {
-    const { to, cc, bcc, subject, body } = req.body;
+    const { to, cc, bcc, subject, body, attachments } = req.body;
 
-    // Create email in database
+    console.log('User email:', req.user.email);
+    console.log('Original recipients:', to);
+
+    let recipients = Array.isArray(to) ? to : [to];
+    const ccRecipients = cc || [];
+    const allRecipients = [...recipients, ...ccRecipients];
+
+    // If sender is sending to themselves, ensure their email is in recipients for inbox display
+    if (allRecipients.some(r => r === req.user.email)) {
+      console.log('Recipients already include user email');
+      // Already includes sender's email, no action needed
+    } else if (recipients.length === 1 && recipients[0].includes('@cmail.vercel.app')) {
+      // Check if username matches sender's email username (case-insensitive)
+      const senderUsername = req.user.email.split('@')[0].toLowerCase();
+      const recipientUsername = recipients[0].split('@')[0].toLowerCase();
+      console.log('Sender username:', senderUsername, 'Recipient username:', recipientUsername);
+      if (senderUsername === recipientUsername) {
+        // Add sender's actual email to ensure inbox display
+        recipients = [...recipients, req.user.email];
+        console.log('Added user email to recipients for inbox display');
+      }
+    }
+
+    // Format attachments to match Email model schema
+    const formattedAttachments = (attachments || []).map(att => {
+      const attachmentId = att.id || att._id || att.fileId;
+      return {
+        filename: att.name || att.originalName || att.filename || 'attachment',
+        url: att.url || (attachmentId ? `/api/files/${attachmentId}/data` : ''),
+        size: att.size || 0
+      };
+    });
+
+    console.log('Sending email with attachments:', formattedAttachments);
+    console.log('Final recipients:', recipients);
+
+    // Create email in database (body is optional)
     const email = await Email.create({
       from: req.user._id,
-      to: Array.isArray(to) ? to : [to],
-      cc: cc || [],
+      to: recipients,
+      cc: ccRecipients,
       bcc: bcc || [],
       subject,
-      body,
+      body: body || '',
+      attachments: formattedAttachments,
       isDraft: false
     });
+
+    console.log('Email created in MongoDB:', email._id);
+    console.log('Email attachments saved:', email.attachments);
 
     // Populate sender info
     await email.populate('from', 'firstName lastName email');
 
-    // Send notification email to recipients
-    const recipients = [...email.to, ...email.cc];
-    for (const recipient of recipients) {
+    // Store in Turso for each recipient
+    for (const recipient of [...recipients, ...ccRecipients]) {
       try {
+        // Save to Turso
+        await saveEmailToTurso({
+          senderId: req.user._id.toString(),
+          senderEmail: req.user.email,
+          senderName: `${req.user.firstName} ${req.user.lastName}`,
+          recipientEmail: recipient,
+          recipientName: recipient,
+          subject,
+          body: body || '',
+          attachmentIds: attachments ? attachments.map(a => a.id || a._id || a.fileId).filter(Boolean) : [],
+          status: 'sent'
+        });
+
+        console.log(`Email saved to Turso for recipient: ${recipient}`);
+
+        // Send notification email to recipients
         await sendEmail({
           to: recipient,
           subject: `New email from ${email.from.firstName} ${email.from.lastName}`,
@@ -33,9 +89,14 @@ exports.sendEmail = async (req, res) => {
               <h2 style="color: #8b5cf6;">New Email from C-mail</h2>
               <p><strong>From:</strong> ${email.from.firstName} ${email.from.lastName} (${email.from.email})</p>
               <p><strong>Subject:</strong> ${subject}</p>
-              <div style="margin: 20px 0; padding: 15px; background: #f5f5f5; border-radius: 8px;">
-                ${body}
-              </div>
+              ${formattedAttachments.length > 0 ? `
+                <p><strong>Attachments:</strong> ${formattedAttachments.map(a => a.filename).join(', ')}</p>
+              ` : ''}
+              ${body ? `
+                <div style="margin: 20px 0; padding: 15px; background: #f5f5f5; border-radius: 8px;">
+                  ${body}
+                </div>
+              ` : ''}
               <p style="color: #666; font-size: 12px;">
                 This email was sent via C-mail. 
                 <a href="${process.env.CLIENT_URL}/inbox" style="color: #8b5cf6;">View in C-mail</a>

@@ -23,7 +23,7 @@ const emailSchema = new mongoose.Schema({
   },
   body: {
     type: String,
-    required: true
+    default: ''
   },
   isRead: {
     type: Boolean,

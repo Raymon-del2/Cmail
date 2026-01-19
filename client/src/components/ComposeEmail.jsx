@@ -64,7 +64,7 @@ const ComposeEmail = ({ isOpen, onClose, onSent, replyTo }) => {
         bcc: formData.bcc ? addDomain(formData.bcc) : [],
         subject: formData.subject,
         body: formData.body,
-        attachments: attachments.map(att => att.id)
+        attachments: attachments
       })
 
       setSuccess(true)

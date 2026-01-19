@@ -7,7 +7,8 @@ const {
   deleteFile,
   getFile,
   renameFile,
-  getStorageUsage
+  getStorageUsage,
+  getFileData
 } = require('../controllers/fileController');
 const { protect } = require('../middleware/auth');
 const upload = require('../middleware/upload');
@@ -21,6 +22,7 @@ router.post('/upload', upload.single('file'), uploadAttachment); // General uplo
 router.get('/label/:labelId', getFiles);
 router.post('/label/:labelId', upload.single('file'), uploadFile);
 router.get('/:fileId', getFile);
+router.get('/:fileId/data', getFileData); // Serve file data from base64
 router.patch('/:fileId/rename', renameFile);
 router.delete('/:fileId', deleteFile);
 

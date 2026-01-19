@@ -2,6 +2,7 @@ const File = require('../models/File');
 const User = require('../models/User');
 const fs = require('fs');
 const path = require('path');
+const { saveFileToTurso, getFileFromTurso, getFilesByLabel, deleteFileFromTurso, getStorageUsage } = require('../utils/tursoFiles');
 
 // Get all files for a label
 exports.getFiles = async (req, res) => {
@@ -19,15 +20,12 @@ exports.getFiles = async (req, res) => {
       });
     }
 
-    const files = await File.find({ 
-      labelId,
-      userId: req.user.id 
-    }).sort({ createdAt: -1 });
+    const files = await getFilesByLabel(labelId, req.user.id);
 
     // Add URLs to files
     const filesWithUrls = files.map(file => ({
-      ...file.toObject(),
-      url: `/uploads/${file.path}`
+      ...file,
+      url: `/api/files/${file.id}/data`
     }));
 
     res.status(200).json({
@@ -75,38 +73,42 @@ exports.uploadAttachment = async (req, res) => {
     else if (req.file.mimetype.startsWith('video/')) fileType = 'video';
     else if (req.file.mimetype.includes('pdf') || req.file.mimetype.includes('document')) fileType = 'document';
 
-    // Create file record with relative path
-    const relativePath = req.file.path.replace(/\\/g, '/').split('uploads/')[1];
-    console.log('Creating attachment file record with path:', relativePath);
-    
-    const file = await File.create({
+    // Convert file to base64
+    const fileBuffer = fs.readFileSync(req.file.path);
+    const base64Data = fileBuffer.toString('base64');
+
+    // Delete local file after converting to base64
+    fs.unlinkSync(req.file.path);
+
+    // Save to Turso
+    const fileId = await saveFileToTurso({
       name: req.file.filename,
       originalName: req.file.originalname,
       type: fileType,
       mimeType: req.file.mimetype,
       size: req.file.size,
-      path: relativePath,
+      base64Data,
       userId: req.user.id,
-      isAttachment: true // Mark as attachment
+      isAttachment: true
     });
 
-    console.log('Attachment file created successfully:', file._id);
+    console.log('Attachment file created successfully:', fileId);
 
     res.status(201).json({
       success: true,
       message: 'File uploaded successfully',
       file: {
-        id: file._id,
-        name: file.originalName,
-        size: file.size,
-        type: file.mimeType,
-        url: `/uploads/${relativePath}`
+        id: fileId,
+        name: req.file.originalname,
+        size: req.file.size,
+        type: req.file.mimetype,
+        url: `/api/files/${fileId}/data`
       }
     });
   } catch (error) {
     console.error('Attachment upload error:', error);
     // Delete uploaded file if error occurs
-    if (req.file) {
+    if (req.file && fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
     }
     res.status(500).json({
@@ -163,35 +165,42 @@ exports.uploadFile = async (req, res) => {
     else if (req.file.mimetype.startsWith('video/')) fileType = 'video';
     else if (req.file.mimetype.includes('pdf') || req.file.mimetype.includes('document')) fileType = 'document';
 
-    // Create file record with relative path
-    const relativePath = req.file.path.replace(/\\/g, '/').split('uploads/')[1];
-    console.log('Creating file record with path:', relativePath);
-    
-    const file = await File.create({
+    // Convert file to base64
+    const fileBuffer = fs.readFileSync(req.file.path);
+    const base64Data = fileBuffer.toString('base64');
+
+    // Delete local file after converting to base64
+    fs.unlinkSync(req.file.path);
+
+    // Save to Turso
+    const fileId = await saveFileToTurso({
       name: req.file.filename,
       originalName: req.file.originalname,
       type: fileType,
       mimeType: req.file.mimetype,
       size: req.file.size,
-      path: relativePath, // Store relative path from uploads directory
-      labelId,
-      userId: req.user.id
+      base64Data,
+      userId: req.user.id,
+      labelId
     });
 
-    console.log('File created successfully:', file._id);
+    console.log('File created successfully:', fileId);
 
     res.status(201).json({
       success: true,
       message: 'File uploaded successfully',
       file: {
-        ...file.toObject(),
-        url: `/uploads/${relativePath}` // Add URL for easy access
+        id: fileId,
+        name: req.file.originalname,
+        size: req.file.size,
+        type: req.file.mimeType,
+        url: `/api/files/${fileId}/data`
       }
     });
   } catch (error) {
     console.error('Upload error:', error);
     // Delete uploaded file if error occurs
-    if (req.file) {
+    if (req.file && fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
     }
     res.status(500).json({
@@ -205,15 +214,13 @@ exports.uploadFile = async (req, res) => {
 // Get total storage used by user's files
 exports.getStorageUsage = async (req, res) => {
   try {
-    const files = await File.find({ userId: req.user.id });
-    
-    const totalSize = files.reduce((sum, file) => sum + (file.size || 0), 0);
+    const usage = await getStorageUsage(req.user.id);
     
     res.json({
       success: true,
-      totalSize,
-      fileCount: files.length,
-      formattedSize: formatBytes(totalSize)
+      totalSize: usage.totalSize,
+      fileCount: usage.fileCount,
+      formattedSize: formatBytes(usage.totalSize)
     });
   } catch (error) {
     console.error('Get storage usage error:', error);
@@ -284,25 +291,8 @@ exports.deleteFile = async (req, res) => {
   try {
     const { fileId } = req.params;
 
-    const file = await File.findOne({
-      _id: fileId,
-      userId: req.user.id
-    });
-
-    if (!file) {
-      return res.status(404).json({
-        success: false,
-        message: 'File not found'
-      });
-    }
-
-    // Delete physical file
-    if (fs.existsSync(file.path)) {
-      fs.unlinkSync(file.path);
-    }
-
-    // Delete database record
-    await file.deleteOne();
+    // Delete from Turso
+    await deleteFileFromTurso(fileId);
 
     res.status(200).json({
       success: true,
@@ -322,10 +312,7 @@ exports.getFile = async (req, res) => {
   try {
     const { fileId } = req.params;
 
-    const file = await File.findOne({
-      _id: fileId,
-      userId: req.user.id
-    });
+    const file = await getFileFromTurso(fileId);
 
     if (!file) {
       return res.status(404).json({
@@ -342,6 +329,40 @@ exports.getFile = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch file',
+      error: error.message
+    });
+  }
+};
+
+// Get file data (serves the actual file content from base64)
+exports.getFileData = async (req, res) => {
+  try {
+    const { fileId } = req.params;
+
+    const file = await getFileFromTurso(fileId);
+
+    if (!file) {
+      return res.status(404).json({
+        success: false,
+        message: 'File not found'
+      });
+    }
+
+    // Convert base64 to buffer
+    const buffer = Buffer.from(file.base64Data, 'base64');
+
+    // Set appropriate content type
+    res.setHeader('Content-Type', file.mimeType);
+    res.setHeader('Content-Length', buffer.length);
+    res.setHeader('Content-Disposition', `inline; filename="${file.originalName}"`);
+
+    // Send the file data
+    res.send(buffer);
+  } catch (error) {
+    console.error('Get file data error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch file data',
       error: error.message
     });
   }

@@ -338,6 +338,46 @@ const EmailView = () => {
                 {email.body}
               </div>
 
+              {/* Attachments */}
+              {email.attachments && email.attachments.length > 0 && (
+                <div className="px-6 py-4 border-t border-dark-border">
+                  <div className="flex items-center space-x-2 mb-3">
+                    <File className="w-4 h-4 text-dark-text-secondary" />
+                    <span className="text-sm text-dark-text-secondary">
+                      {email.attachments.length} {email.attachments.length === 1 ? 'attachment' : 'attachments'}
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    {email.attachments.map((attachment, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between bg-dark-bg rounded-lg p-3 hover:bg-dark-card transition-colors"
+                      >
+                        <div className="flex items-center space-x-3 flex-1 min-w-0">
+                          <File className="w-5 h-5 text-cmail-purple flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm text-dark-text truncate">
+                              {attachment.filename}
+                            </div>
+                            <div className="text-xs text-dark-text-secondary">
+                              {attachment.size ? `${(attachment.size / 1024).toFixed(2)} KB` : 'Unknown size'}
+                            </div>
+                          </div>
+                        </div>
+                        <a
+                          href={attachment.url}
+                          download={attachment.filename}
+                          className="flex items-center space-x-2 px-3 py-1.5 bg-cmail-purple hover:bg-cmail-purple-dark text-white rounded-lg transition-colors text-sm"
+                        >
+                          <Download className="w-4 h-4" />
+                          <span>Download</span>
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Reply/Forward Buttons */}
               <div className="px-6 py-4 border-t border-dark-border flex items-center space-x-2">
                 <button

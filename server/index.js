@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
+const initTursoDB = require('./config/initTurso');
 
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
@@ -60,6 +61,9 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/cmail', {
 })
 .then(() => console.log('✅ MongoDB connected successfully'))
 .catch(err => console.error('❌ MongoDB connection error:', err));
+
+// Initialize Turso Database
+initTursoDB();
 
 // Error handling middleware
 app.use((err, req, res, next) => {
