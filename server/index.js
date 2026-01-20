@@ -54,16 +54,44 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'C-mail API is running' });
 });
 
-// MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/cmail', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log(' MongoDB connected successfully'))
-.catch(err => console.error(' MongoDB connection error:', err));
+// Initialize databases (lazy initialization for serverless)
+let isInitialized = false;
+async function initializeDatabases() {
+  if (isInitialized) return;
 
-// Initialize Turso Database
-initTursoDB();
+  try {
+    // MongoDB Connection
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/cmail', {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+    console.log(' MongoDB connected successfully');
+
+    // Initialize Turso Database
+    initTursoDB();
+    console.log(' Turso initialized');
+
+    isInitialized = true;
+  } catch (err) {
+    console.error(' Database initialization error:', err);
+    throw err;
+  }
+}
+
+// Initialize databases on first request
+app.use(async (req, res, next) => {
+  if (!isInitialized) {
+    try {
+      await initializeDatabases();
+    } catch (err) {
+      return res.status(500).json({
+        success: false,
+        message: 'Database initialization failed'
+      });
+    }
+  }
+  next();
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
