@@ -4,8 +4,14 @@ const fs = require('fs');
 
 // Create uploads directory if it doesn't exist
 const uploadsDir = path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
+try {
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+} catch (err) {
+  // In Vercel serverless, the directory structure is different
+  // We'll handle this when uploads are actually needed
+  console.log('Uploads directory will be created when needed');
 }
 
 // Configure storage
