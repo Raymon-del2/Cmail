@@ -25,9 +25,11 @@ app.use(cors({
   credentials: true
 }));
 
-// Serve uploaded files
+// Serve uploaded files and client static assets
 const path = require('path');
+const distPath = path.join(__dirname, '../client/dist');
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(express.static(distPath));
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -38,6 +40,14 @@ app.use('/api/files', fileRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/phone-verification', phoneVerificationRoutes);
 app.use('/api/oauth', oauthRoutes);
+
+// SPA fallback for client-side routing
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
+    return next();
+  }
+  res.sendFile(path.join(distPath, 'index.html'));
+});
 
 // Root route
 app.get('/', (req, res) => {
