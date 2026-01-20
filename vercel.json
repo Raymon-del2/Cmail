@@ -1,16 +1,27 @@
 {
-  "rewrites": [
+  "buildCommand": "cd client && npm run build",
+  "outputDirectory": "public",
+  "builds": [
     {
-      "source": "/api/:path*",
-      "destination": "/server/index.js"
+      "src": "server/index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/server/index.js"
     },
     {
-      "source": "/uploads/:path*",
-      "destination": "/server/index.js"
+      "src": "/uploads/(.*)",
+      "dest": "/server/index.js"
     },
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }
