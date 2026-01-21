@@ -60,20 +60,22 @@ async function initializeDatabases() {
   if (isInitialized) return;
 
   try {
-    // MongoDB Connection
+    // MongoDB Connection with timeout and retry
     await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/cmail', {
       useNewUrlParser: true,
-      useUnifiedTopology: true
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 10000
     });
-    console.log(' MongoDB connected successfully');
+    console.log('✅ MongoDB connected successfully');
 
     // Initialize Turso Database
     initTursoDB();
-    console.log(' Turso initialized');
+    console.log('✅ Turso initialized');
 
     isInitialized = true;
   } catch (err) {
-    console.error(' Database initialization error:', err);
+    console.error('❌ Database initialization error:', err);
     throw err;
   }
 }
