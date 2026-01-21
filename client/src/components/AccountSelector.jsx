@@ -61,17 +61,7 @@ const AccountSelector = () => {
     }
   }
 
-  if (!isOpen) {
-    return (
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 z-50 px-4 py-2 bg-cmail-purple hover:bg-cmail-purple-dark text-white rounded-full shadow-lg transition-colors text-sm font-medium"
-        style={{ display: process.env.NODE_ENV === 'development' ? 'block' : 'none' }}
-      >
-        Switch Account
-      </button>
-    )
-  }
+  if (!isOpen) return null
 
   return (
     <>
