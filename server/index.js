@@ -60,6 +60,14 @@ async function initializeDatabases() {
   if (isInitialized) return;
 
   try {
+    // Check if MONGODB_URI is set
+    console.log('MONGODB_URI set:', !!process.env.MONGODB_URI);
+    console.log('MONGODB_URI length:', process.env.MONGODB_URI?.length);
+    
+    if (!process.env.MONGODB_URI) {
+      throw new Error('MONGODB_URI is not set');
+    }
+
     // MongoDB Connection with timeout and retry
     await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/cmail', {
       useNewUrlParser: true,
