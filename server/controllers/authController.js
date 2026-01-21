@@ -98,25 +98,33 @@ exports.signup = async (req, res) => {
 // Sign in
 exports.signin = async (req, res) => {
   try {
+    console.log('Signin request received:', { email: req.body.email });
+    console.log('MongoDB connection state:', mongoose.connection.readyState);
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      console.log('Validation errors:', errors.array());
       return res.status(400).json({ success: false, errors: errors.array() });
     }
 
     const { email, password } = req.body;
 
     // Find user and include password
+    console.log('Finding user with email:', email);
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
+      console.log('User not found');
       return res.status(401).json({
         success: false,
         message: 'Invalid email or password'
       });
     }
 
+    console.log('User found, comparing password');
     // Check password
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
+      console.log('Password invalid');
       return res.status(401).json({
         success: false,
         message: 'Invalid email or password'
@@ -127,8 +135,10 @@ exports.signin = async (req, res) => {
     await User.findByIdAndUpdate(user._id, { lastLogin: Date.now() }, { timestamps: false });
 
     // Generate token
+    console.log('Generating token');
     const token = generateToken(user._id);
 
+    console.log('Signin successful');
     res.json({
       success: true,
       message: 'Signed in successfully',
@@ -148,9 +158,11 @@ exports.signin = async (req, res) => {
     });
   } catch (error) {
     console.error('Signin error:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({
       success: false,
-      message: 'Error signing in'
+      message: 'Error signing in',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };
