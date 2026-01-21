@@ -8,7 +8,6 @@ client/node_modules/
 .env.production
 
 # Build output
-client/dist/
 client/build/
 dist/
 build/
