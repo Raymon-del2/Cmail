@@ -20,6 +20,19 @@ const SignIn = () => {
   const [magicLinkSent, setMagicLinkSent] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
 
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    
+    // Prevent @ symbol in username field
+    if (name === 'username' && value.includes('@')) {
+      setError('Username cannot contain @ symbol')
+      return
+    }
+    
+    setFormData({ ...formData, [name]: value })
+    setError('')
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
