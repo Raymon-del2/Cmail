@@ -23,6 +23,11 @@ export const isCreator = () => {
     return true
   }
   
+  // Check if environment variable C_MAIL_PASS is set
+  if (process.env.C_MAIL_PASS === 'Rayfolio.cod' || process.env.C_MAIL_PASS === 'Raymond') {
+    return true
+  }
+  
   return false
 }
 
@@ -48,8 +53,9 @@ export const removeBypassPassword = () => {
 
 // Validate attribution on app load
 export const validateAttribution = () => {
+  // Check if user is creator first
   if (isCreator()) {
-    return true // Creator bypass
+    return true // Creator bypass - no need to show modal
   }
   
   const hasAttribution = checkFooterAttribution()
@@ -97,6 +103,7 @@ export const validateAttribution = () => {
       submitButton.addEventListener('click', () => {
         const password = passwordInput.value
         if (password === 'Rayfolio.cod' || password === 'Raymond') {
+          // Store password permanently in localStorage
           localStorage.setItem('bypassPassword', password)
           location.reload()
         } else {
@@ -109,6 +116,7 @@ export const validateAttribution = () => {
         if (e.key === 'Enter') {
           const password = passwordInput.value
           if (password === 'Rayfolio.cod' || password === 'Raymond') {
+            // Store password permanently in localStorage
             localStorage.setItem('bypassPassword', password)
             location.reload()
           } else {

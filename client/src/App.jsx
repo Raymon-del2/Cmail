@@ -4,7 +4,7 @@ import { MenuProvider } from './context/MenuContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import AccountSelector from './components/AccountSelector'
 import Footer from './components/Footer'
-import { validateAttribution, setCreatorEmail } from './utils/attribution'
+import { validateAttribution, isCreator } from './utils/attribution'
 import './styles/mobile.css'
 import SignIn from './pages/SignIn'
 import SignUp from './pages/SignUp'
@@ -35,11 +35,6 @@ import PrivacyPolicy from './pages/PrivacyPolicy'
 import DeveloperDashboard from './pages/DeveloperDashboard'
 import DeveloperDocs from './pages/DeveloperDocs'
 import OAuthAuthorize from './pages/OAuthAuthorize'
-
-// Set creator email to bypass attribution check
-if (typeof window !== 'undefined') {
-  setCreatorEmail('creator@cmail.vercel.app')
-}
 
 // Validate attribution on app load
 if (typeof window !== 'undefined') {
@@ -217,10 +212,10 @@ function App() {
           <Route path="/" element={<Navigate to="/signin" replace />} />
         </Routes>
         <AccountSelector />
-        <Footer isCreator={false} />
+        <Footer isCreator={isCreator()} />
       </Router>
     </AuthProvider>
-    </MenuProvider>
+  </MenuProvider>
   )
 }
 
