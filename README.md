@@ -260,8 +260,13 @@ PORT=3000
 ```
 
 ## License
+Attribution Required !
+This application requires attribution to Coded Waves.
 
-MIT License - Feel free to use this project for personal or commercial purposes.
+Please add the following to your footer:
+
+<a href="https://rayfolio.vercel.app">By Coded Waves</a>
+Contact the creator for a creator license.
 
 ## Contributing
 
