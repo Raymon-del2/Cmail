@@ -13,6 +13,54 @@ const fileRoutes = require('./routes/fileRoutes');
 const subscriptionRoutes = require('./routes/subscriptionRoutes');
 const phoneVerificationRoutes = require('./routes/phoneVerification');
 const oauthRoutes = require('./routes/oauthRoutes');
+const verificationRoutes = require('./routes/verificationRoutes');
+
+// Initialize databases (lazy initialization for serverless)
+let isInitialized = false;
+let mongoConnectionPromise = null;
+
+async function connectMongo() {
+  if (mongoose.connection.readyState === 1) {
+    return mongoose.connection;
+  }
+
+  if (!mongoConnectionPromise) {
+    if (!process.env.MONGODB_URI) {
+      throw new Error('MONGODB_URI is not set');
+    }
+    
+    mongoConnectionPromise = mongoose
+      .connect(process.env.MONGODB_URI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        serverSelectionTimeoutMS: 10000,
+        socketTimeoutMS: 10000
+      })
+      .catch((err) => {
+        mongoConnectionPromise = null;
+        throw err;
+      });
+  }
+
+  return mongoConnectionPromise;
+}
+
+async function initializeDatabases() {
+  if (isInitialized) return;
+
+  try {
+    if (!process.env.MONGODB_URI) {
+      throw new Error('MONGODB_URI is not set');
+    }
+
+    await connectMongo();
+    initTursoDB();
+    isInitialized = true;
+  } catch (err) {
+    console.error('Database initialization error:', err);
+    throw err;
+  }
+}
 
 const app = express();
 
@@ -29,6 +77,23 @@ app.use(cors({
 const path = require('path');
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Initialize databases on first API request
+app.use(async (req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    if (!isInitialized) {
+      try {
+        await initializeDatabases();
+      } catch (err) {
+        return res.status(500).json({
+          success: false,
+          message: 'Database initialization failed'
+        });
+      }
+    }
+  }
+  next();
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
@@ -38,6 +103,7 @@ app.use('/api/files', fileRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/phone-verification', phoneVerificationRoutes);
 app.use('/api/oauth', oauthRoutes);
+app.use('/api/verification', verificationRoutes);
 
 // Root route
 app.get('/', (req, res) => {
@@ -52,55 +118,6 @@ app.get('/', (req, res) => {
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'C-mail API is running' });
-});
-
-// Initialize databases (lazy initialization for serverless)
-let isInitialized = false;
-async function initializeDatabases() {
-  if (isInitialized) return;
-
-  try {
-    // Check if MONGODB_URI is set
-    console.log('MONGODB_URI set:', !!process.env.MONGODB_URI);
-    console.log('MONGODB_URI length:', process.env.MONGODB_URI?.length);
-    
-    if (!process.env.MONGODB_URI) {
-      throw new Error('MONGODB_URI is not set');
-    }
-
-    // MongoDB Connection with timeout and retry
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/cmail', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 10000,
-      socketTimeoutMS: 10000
-    });
-    console.log('✅ MongoDB connected successfully');
-
-    // Initialize Turso Database
-    initTursoDB();
-    console.log('✅ Turso initialized');
-
-    isInitialized = true;
-  } catch (err) {
-    console.error('❌ Database initialization error:', err);
-    throw err;
-  }
-}
-
-// Initialize databases on first request
-app.use(async (req, res, next) => {
-  if (!isInitialized) {
-    try {
-      await initializeDatabases();
-    } catch (err) {
-      return res.status(500).json({
-        success: false,
-        message: 'Database initialization failed'
-      });
-    }
-  }
-  next();
 });
 
 // Error handling middleware
