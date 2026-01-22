@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Mail, Lock, AlertCircle, Eye, EyeOff } from 'lucide-react'
 import axios from 'axios'
 import { useAuth } from '../context/AuthContext'
@@ -8,6 +8,7 @@ import Loader from '../components/Loader'
 
 const SignIn = () => {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { login } = useAuth()
   const [formData, setFormData] = useState({
     username: '',
@@ -18,19 +19,6 @@ const SignIn = () => {
   const [loading, setLoading] = useState(false)
   const [magicLinkSent, setMagicLinkSent] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-
-  const handleChange = (e) => {
-    const { name, value } = e.target
-    
-    // Prevent @ symbol in username field
-    if (name === 'username' && value.includes('@')) {
-      setError('Username cannot contain @ symbol')
-      return
-    }
-    
-    setFormData({ ...formData, [name]: value })
-    setError('')
-  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -47,8 +35,16 @@ const SignIn = () => {
       })
       console.log('Sign in response:', response.data)
       login(response.data.token, response.data.user)
-      console.log('Navigating to inbox...')
-      navigate('/inbox')
+      
+      // Check for return URL (for OAuth flow)
+      const returnUrl = searchParams.get('return')
+      if (returnUrl) {
+        console.log('Redirecting to return URL:', returnUrl)
+        navigate(decodeURIComponent(returnUrl))
+      } else {
+        console.log('Navigating to inbox...')
+        navigate('/inbox')
+      }
     } catch (err) {
       console.error('Sign in error:', err)
       setError(err.response?.data?.message || 'Failed to sign in')

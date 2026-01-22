@@ -79,10 +79,28 @@ exports.authorize = async (req, res) => {
       });
     }
 
+    // Check if user is authenticated
+    if (!req.user) {
+      // Return response indicating user needs to authenticate
+      return res.json({
+        success: true,
+        requiresAuth: true,
+        authParams: {
+          client_id,
+          redirect_uri,
+          scope: scope || 'email profile',
+          state,
+          response_type
+        },
+        message: 'Authentication required'
+      });
+    }
+
     // Handle public API (no registration needed)
     if (client_id === 'cmail_public_api') {
       return res.json({
         success: true,
+        requiresAuth: false,
         app: {
           name: 'Public Application',
           description: 'Open source Cmail authentication',
@@ -119,6 +137,7 @@ exports.authorize = async (req, res) => {
     // Return app info for consent screen
     res.json({
       success: true,
+      requiresAuth: false,
       app: {
         name: app.name,
         description: app.description,

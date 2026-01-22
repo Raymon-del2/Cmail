@@ -15,8 +15,8 @@ const {
 router.post('/apps/register', protect, registerApp);
 router.get('/apps', protect, getMyApps);
 
-// OAuth 2.0 endpoints
-router.get('/authorize', protect, authorize);
+// OAuth 2.0 endpoints (authorize does not require auth - user will be prompted to sign in)
+router.get('/authorize', authorize);
 router.post('/authorize/grant', protect, grant);
 router.post('/token', token);
 router.get('/userinfo', userinfo);
