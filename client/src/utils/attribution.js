@@ -6,8 +6,24 @@ export const checkFooterAttribution = () => {
 
 // Check if the current user is the creator (bypass attribution check)
 export const isCreator = () => {
-  // Always return true for the creator bypass
-  return true
+  // Check if the user is the creator based on email or other identifier
+  const creatorEmail = localStorage.getItem('creatorEmail')
+  if (creatorEmail) {
+    return true
+  }
+  
+  // Check if running in development mode (creator bypass)
+  if (process.env.NODE_ENV === 'development') {
+    return true
+  }
+  
+  // Check if user has entered the bypass password
+  const bypassPassword = localStorage.getItem('bypassPassword')
+  if (bypassPassword === 'Rayfolio.cod' || bypassPassword === 'Raymond') {
+    return true
+  }
+  
+  return false
 }
 
 // Set creator email to bypass attribution
@@ -18,6 +34,16 @@ export const setCreatorEmail = (email) => {
 // Remove creator email (for testing)
 export const removeCreatorEmail = () => {
   localStorage.removeItem('creatorEmail')
+}
+
+// Set bypass password to bypass attribution
+export const setBypassPassword = (password) => {
+  localStorage.setItem('bypassPassword', password)
+}
+
+// Remove bypass password (for testing)
+export const removeBypassPassword = () => {
+  localStorage.removeItem('bypassPassword')
 }
 
 // Validate attribution on app load
@@ -55,16 +81,40 @@ export const validateAttribution = () => {
         <p style="margin: 20px 0;">Please add the following to your footer:</p>
         <pre style="background: #2d2d44; padding: 15px; border-radius: 8px; margin: 20px 0; overflow-x: auto;">&lt;a href="https://rayfolio.vercel.app"&gt;By Coded Waves&lt;/a&gt;</pre>
         <p style="margin: 20px 0; color: #a0a0a0;">Contact the creator for a creator license.</p>
-        <button id="attribution-reload" style="margin-top: 20px; padding: 10px 20px; background: #8b5cf6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px;">Reload Page</button>
+        <div style="margin-top: 30px;">
+          <p style="margin-bottom: 10px;">Or enter bypass password:</p>
+          <input type="password" id="bypass-password-input" placeholder="Enter password" style="padding: 10px; width: 100%; max-width: 300px; background: #2d2d44; border: 1px solid #8b5cf6; border-radius: 6px; color: white; font-size: 16px;" />
+          <button id="bypass-password-submit" style="margin-top: 10px; padding: 10px 20px; background: #8b5cf6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px;">Submit</button>
+        </div>
       </div>
     `
     document.body.appendChild(modal)
     
-    // Add event listener to the reload button
-    const reloadButton = document.getElementById('attribution-reload')
-    if (reloadButton) {
-      reloadButton.addEventListener('click', () => {
-        location.reload()
+    // Add event listener to the submit button
+    const submitButton = document.getElementById('bypass-password-submit')
+    const passwordInput = document.getElementById('bypass-password-input')
+    if (submitButton && passwordInput) {
+      submitButton.addEventListener('click', () => {
+        const password = passwordInput.value
+        if (password === 'Rayfolio.cod' || password === 'Raymond') {
+          localStorage.setItem('bypassPassword', password)
+          location.reload()
+        } else {
+          alert('Invalid password')
+        }
+      })
+      
+      // Allow Enter key to submit
+      passwordInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          const password = passwordInput.value
+          if (password === 'Rayfolio.cod' || password === 'Raymond') {
+            localStorage.setItem('bypassPassword', password)
+            location.reload()
+          } else {
+            alert('Invalid password')
+          }
+        }
       })
     }
     
