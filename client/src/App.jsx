@@ -1,7 +1,10 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
+import { MenuProvider } from './context/MenuContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import AccountSelector from './components/AccountSelector'
+import Footer from './components/Footer'
+import { validateAttribution } from './utils/attribution'
 import './styles/mobile.css'
 import SignIn from './pages/SignIn'
 import SignUp from './pages/SignUp'
@@ -33,11 +36,17 @@ import DeveloperDashboard from './pages/DeveloperDashboard'
 import DeveloperDocs from './pages/DeveloperDocs'
 import OAuthAuthorize from './pages/OAuthAuthorize'
 
+// Validate attribution on app load
+if (typeof window !== 'undefined') {
+  validateAttribution()
+}
+
 function App() {
   return (
-    <AuthProvider>
-      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-        <Routes>
+    <MenuProvider>
+      <AuthProvider>
+        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <Routes>
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -203,8 +212,10 @@ function App() {
           <Route path="/" element={<Navigate to="/signin" replace />} />
         </Routes>
         <AccountSelector />
+        <Footer isCreator={false} />
       </Router>
     </AuthProvider>
+    </MenuProvider>
   )
 }
 
