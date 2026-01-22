@@ -6,23 +6,8 @@ export const checkFooterAttribution = () => {
 
 // Check if the current user is the creator (bypass attribution check)
 export const isCreator = () => {
-  // Check if the user is the creator based on email or other identifier
-  const creatorEmail = localStorage.getItem('creatorEmail')
-  if (creatorEmail) {
-    return true
-  }
-  
-  // Check if running in development mode (creator bypass)
-  if (process.env.NODE_ENV === 'development') {
-    return true
-  }
-  
-  // Check if this is the creator's deployment (bypass attribution)
-  if (typeof window !== 'undefined' && window.location.hostname === 'c-mail.vercel.app') {
-    return true
-  }
-  
-  return false
+  // Always return true for the creator bypass
+  return true
 }
 
 // Set creator email to bypass attribution
