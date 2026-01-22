@@ -47,7 +47,7 @@ exports.sendVerificationCode = async (req, res) => {
     verificationCodes.set(email, codeData);
 
     // Send email with verification code
-    await sendEmail({
+    const emailResult = await sendEmail({
       to: email,
       subject: 'Your CMail Verification Code',
       html: `
@@ -63,7 +63,30 @@ exports.sendVerificationCode = async (req, res) => {
       `
     });
 
-    console.log(`📧 Verification code sent to ${email}: ${code}`);
+    console.log(`📧 Verification code: ${code}`);
+    console.log(`📧 Email result:`, emailResult);
+
+    if (emailResult.skipped) {
+      console.log('⚠️ Email was skipped (service not configured)');
+      return res.json({
+        success: true,
+        message: 'Verification code generated (email not sent - service not configured)',
+        devCode: code,
+        skipped: true
+      });
+    }
+
+    if (emailResult.error) {
+      console.log('⚠️ Email sending failed:', emailResult.error);
+      return res.json({
+        success: true,
+        message: 'Verification code generated (email send failed)',
+        devCode: code,
+        error: emailResult.error
+      });
+    }
+
+    console.log(`✅ Email sent successfully to ${email}`);
 
     res.json({
       success: true,
