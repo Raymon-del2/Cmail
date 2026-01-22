@@ -23,6 +23,10 @@
       "dest": "/client/dist/assets/$1"
     },
     {
+      "src": "/cmail-icon.svg",
+      "dest": "/client/dist/cmail-icon.svg"
+    },
+    {
       "src": "/index.html",
       "dest": "/client/dist/index.html"
     },
