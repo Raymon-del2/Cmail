@@ -18,7 +18,7 @@ const Footer = () => {
       </p>
       <p className="text-xs text-dark-text-secondary mt-2">
         <a
-          href="mailto:hello@codedwaves.com"
+          href="mailto:playra@cmail.vercel.app"
           className="text-cmail-purple hover:text-cmail-purple-dark transition-colors"
         >
           Contact for Pro
