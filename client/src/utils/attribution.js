@@ -28,16 +28,37 @@ export const validateAttribution = () => {
   
   const hasAttribution = checkFooterAttribution()
   if (!hasAttribution) {
-    // Block the app if attribution is missing
-    document.body.innerHTML = `
-      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #1a1a2e; color: #fff; font-family: sans-serif; text-align: center; padding: 20px;">
-        <h1 style="color: #8b5cf6;">Attribution Required</h1>
+    // Show attribution modal instead of replacing body to prevent React errors
+    const modal = document.createElement('div')
+    modal.id = 'attribution-modal'
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 999999;
+      padding: 20px;
+      color: #fff;
+      font-family: sans-serif;
+      text-align: center;
+    `
+    modal.innerHTML = `
+      <div style="background: #1a1a2e; padding: 40px; border-radius: 12px; border: 1px solid #8b5cf6; max-width: 500px;">
+        <h1 style="color: #8b5cf6; margin-bottom: 20px;">Attribution Required</h1>
         <p style="margin: 20px 0;">This application requires attribution to Coded Waves.</p>
         <p style="margin: 20px 0;">Please add the following to your footer:</p>
-        <pre style="background: #2d2d44; padding: 15px; border-radius: 8px; margin: 20px 0;">&lt;a href="https://rayfolio.vercel.app"&gt;By Coded Waves&lt;/a&gt;</pre>
+        <pre style="background: #2d2d44; padding: 15px; border-radius: 8px; margin: 20px 0; overflow-x: auto;">&lt;a href="https://rayfolio.vercel.app"&gt;By Coded Waves&lt;/a&gt;</pre>
         <p style="margin: 20px 0; color: #a0a0a0;">Contact the creator for a creator license.</p>
+        <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #8b5cf6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px;">Reload Page</button>
       </div>
     `
+    document.body.appendChild(modal)
     return false
   }
   
