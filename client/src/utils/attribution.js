@@ -17,6 +17,11 @@ export const isCreator = () => {
     return true
   }
   
+  // Check if this is the creator's deployment (bypass attribution)
+  if (typeof window !== 'undefined' && window.location.hostname === 'c-mail.vercel.app') {
+    return true
+  }
+  
   return false
 }
 
