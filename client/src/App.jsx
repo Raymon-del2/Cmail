@@ -4,7 +4,7 @@ import { MenuProvider } from './context/MenuContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import AccountSelector from './components/AccountSelector'
 import Footer from './components/Footer'
-import { validateAttribution, isCreator } from './utils/attribution'
+import { validateAttribution } from './utils/attribution'
 import './styles/mobile.css'
 import SignIn from './pages/SignIn'
 import SignUp from './pages/SignUp'
@@ -212,7 +212,7 @@ function App() {
           <Route path="/" element={<Navigate to="/signin" replace />} />
         </Routes>
         <AccountSelector />
-        <Footer isCreator={isCreator()} />
+        <Footer />
       </Router>
     </AuthProvider>
   </MenuProvider>

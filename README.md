@@ -260,13 +260,16 @@ PORT=3000
 ```
 
 ## License
-Attribution Required !
-This application requires attribution to Coded Waves.
 
-Please add the following to your footer:
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-<a href="https://rayfolio.vercel.app">By Coded Waves</a>
-Contact the creator for a creator license.
+## Branding
+
+CMail Core includes a small attribution footer:
+"Powered by CMail (CodedWaves)".
+
+If you need a white-label version, custom templates, or advanced features,
+check out **CMail Pro**.
 
 ## Contributing
 
