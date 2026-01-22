@@ -148,6 +148,66 @@ The application will be available at:
 - `PUT /api/user/password` - Update password
 - `DELETE /api/user/me` - Delete account
 
+### 4-Digit Email Verification (for Third-Party Apps)
+- `POST /api/verification/send-code` - Send 4-digit verification code to user's email
+- `POST /api/verification/verify-code` - Verify code and get access token
+- `POST /api/verification/resend-code` - Resend verification code
+
+**How Third-Party Apps Use Verification Codes:**
+
+1. **Send verification code:**
+```javascript
+POST /api/verification/send-code
+{
+  "email": "user@cmail.vercel.app",
+  "client_id": "your_client_id",
+  "redirect_uri": "https://yourapp.com/callback"
+}
+```
+
+2. **User receives email with 4-digit code**
+
+3. **Verify code and get access token:**
+```javascript
+POST /api/verification/verify-code
+{
+  "email": "user@cmail.vercel.app",
+  "code": "1234",
+  "client_id": "your_client_id",
+  "client_secret": "your_client_secret"
+}
+```
+
+4. **Response includes access token and user info:**
+```json
+{
+  "success": true,
+  "access_token": "cmail_access_...",
+  "refresh_token": "cmail_refresh_...",
+  "user": {
+    "id": "...",
+    "email": "...",
+    "firstName": "...",
+    "lastName": "..."
+  }
+}
+```
+
+**Features:**
+- Codes expire in 10 minutes
+- In development mode, code returned in response for testing
+- Uses Brevo email service (configured with BREVO_API_KEY)
+- Stores tokens in database for OAuth flow
+
+### OAuth 2.0 (for Developer Apps)
+- `GET /api/oauth/authorize` - OAuth authorization endpoint
+- `POST /api/oauth/authorize/grant` - Grant authorization
+- `POST /api/oauth/token` - Exchange code for access token
+- `GET /api/oauth/userinfo` - Get user info from access token
+- `POST /api/oauth/revoke` - Revoke access token
+- `GET /api/oauth/apps` - List developer apps
+- `POST /api/oauth/apps/register` - Register new developer app
+
 ## Project Structure
 
 ```
