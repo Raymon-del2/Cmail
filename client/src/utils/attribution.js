@@ -20,6 +20,16 @@ export const isCreator = () => {
   return false
 }
 
+// Set creator email to bypass attribution
+export const setCreatorEmail = (email) => {
+  localStorage.setItem('creatorEmail', email)
+}
+
+// Remove creator email (for testing)
+export const removeCreatorEmail = () => {
+  localStorage.removeItem('creatorEmail')
+}
+
 // Validate attribution on app load
 export const validateAttribution = () => {
   if (isCreator()) {
