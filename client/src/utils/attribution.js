@@ -55,10 +55,19 @@ export const validateAttribution = () => {
         <p style="margin: 20px 0;">Please add the following to your footer:</p>
         <pre style="background: #2d2d44; padding: 15px; border-radius: 8px; margin: 20px 0; overflow-x: auto;">&lt;a href="https://rayfolio.vercel.app"&gt;By Coded Waves&lt;/a&gt;</pre>
         <p style="margin: 20px 0; color: #a0a0a0;">Contact the creator for a creator license.</p>
-        <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #8b5cf6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px;">Reload Page</button>
+        <button id="attribution-reload" style="margin-top: 20px; padding: 10px 20px; background: #8b5cf6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px;">Reload Page</button>
       </div>
     `
     document.body.appendChild(modal)
+    
+    // Add event listener to the reload button
+    const reloadButton = document.getElementById('attribution-reload')
+    if (reloadButton) {
+      reloadButton.addEventListener('click', () => {
+        location.reload()
+      })
+    }
+    
     return false
   }
   
